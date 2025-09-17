@@ -16,6 +16,27 @@
   *
   ******************************************************************************
   */
+
+#ifndef STM32F4xx
+#define STM32F4xx
+#endif
+
+#ifndef STM32F411xE
+#define STM32F411xE
+#endif
+
+#ifndef ARDUINO_NUCLEO_F411RE
+#define ARDUINO_NUCLEO_F411RE
+#endif
+
+#ifndef USE_HAL_DRIVER
+#define USE_HAL_DRIVER
+#endif
+
+#ifndef HAL_UART_MODULE_ENABLED
+#define HAL_UART_MODULE_ENABLED
+#endif
+
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/

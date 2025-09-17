@@ -3,20 +3,20 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include "stm32f4xx_hal.h"
+#include <Wire.h>
 
 ///< The class which defines how we will talk to this device over I2C
 class Adafruit_I2CDevice {
 public:
-  Adafruit_I2CDevice(uint8_t addr, I2C_HandleTypeDef *theWire);
+  Adafruit_I2CDevice(uint8_t addr, TwoWire *theWire = &Wire);
   uint8_t address(void);
   bool begin(bool addr_detect = true);
   void end(void);
   bool detected(void);
 
   bool read(uint8_t *buffer, size_t len, bool stop = true);
-  bool write(uint8_t *buffer, size_t len, bool stop = true,
-             uint8_t *prefix_buffer = nullptr, size_t prefix_len = 0);
+  bool write(const uint8_t *buffer, size_t len, bool stop = true,
+             const uint8_t *prefix_buffer = nullptr, size_t prefix_len = 0);
   bool write_then_read(const uint8_t *write_buffer, size_t write_len,
                        uint8_t *read_buffer, size_t read_len,
                        bool stop = false);
@@ -28,7 +28,7 @@ public:
 
 private:
   uint8_t _addr;
-  I2C_HandleTypeDef *_wire;
+  TwoWire *_wire;
   bool _begun;
   size_t _maxBufferSize;
   bool _read(uint8_t *buffer, size_t len, bool stop);

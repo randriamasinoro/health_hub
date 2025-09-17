@@ -1,16 +1,11 @@
 #ifndef Adafruit_BusIO_Register_h
 #define Adafruit_BusIO_Register_h
 
+#include <Adafruit_GenericDevice.h>
 #include <stdint.h>
 #include <stdlib.h>
 
-#include <Adafruit_GenericDevice.h>
 #include <Adafruit_I2CDevice.h>
-
-enum BitOrder {
-  LSBFIRST = 0,
-  MSBFIRST = 1
-};
 
 /*!
  * @brief The class which defines a device register (a location to read/write
@@ -40,6 +35,9 @@ public:
   void setWidth(uint8_t width);
   void setAddress(uint16_t address);
   void setAddressWidth(uint16_t address_width);
+
+  void print(Stream *s = &Serial);
+  void println(Stream *s = &Serial);
 
 private:
   Adafruit_I2CDevice *_i2cdevice;

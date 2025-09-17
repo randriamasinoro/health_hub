@@ -23,6 +23,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
+#include <Wire.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -104,7 +107,7 @@ int main(void)
   MX_I2C2_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  //HAL_I2C_Master_Seq_Transmit_DMA(&hi2c1, DevAddress, pData, Size, XferOptions)
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -381,9 +384,34 @@ static void MX_GPIO_Init(void)
 void StartDefaultTask(void const * argument)
 {
   /* USER CODE BEGIN 5 */
+	Adafruit_MPU6050 mpu;
+
+	  // Try to initialize!
+	  if (!mpu.begin()) {
+	    while (1) {
+	    	osDelay(10);
+	    }
+	  }
+
+	  mpu.setHighPassFilter(MPU6050_HIGHPASS_0_63_HZ);
+	  mpu.setMotionDetectionThreshold(1);
+	  mpu.setMotionDetectionDuration(20);
+	  mpu.setInterruptPinLatch(true);	// Keep it latched.  Will turn off when reinitialized.
+	  mpu.setInterruptPinPolarity(true);
+	  mpu.setMotionInterrupt(true);
+
+	  osDelay(100);
   /* Infinite loop */
   for(;;)
   {
+	  if(mpu.getMotionInterruptStatus()) {
+	      /* Get new sensor events with the readings */
+	      sensors_event_t a, g, temp;
+	      mpu.getEvent(&a, &g, &temp);
+	    }
+
+	  osDelay(10);
+
 	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	  osDelay(1000);
   }

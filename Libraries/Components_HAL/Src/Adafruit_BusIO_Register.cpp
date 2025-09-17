@@ -27,6 +27,7 @@ Adafruit_BusIO_Register::Adafruit_BusIO_Register(Adafruit_I2CDevice *i2cdevice,
   _width = width;
 }
 
+
 /*!
  * @brief Create a register we access over a GenericDevice
  * @param genericdevice Generic device to use
@@ -178,6 +179,25 @@ bool Adafruit_BusIO_Register::read(uint8_t *value) {
 
   *value = _buffer[0];
   return true;
+}
+
+/*!
+ *    @brief  Pretty printer for this register
+ *    @param  s The Stream to print to, defaults to &Serial
+ */
+void Adafruit_BusIO_Register::print(Stream *s) {
+  uint32_t val = read();
+  s->print("0x");
+  s->print(val, HEX);
+}
+
+/*!
+ *    @brief  Pretty printer for this register
+ *    @param  s The Stream to print to, defaults to &Serial
+ */
+void Adafruit_BusIO_Register::println(Stream *s) {
+  print(s);
+  s->println();
 }
 
 /*!

@@ -4,7 +4,7 @@
   chats are not shareable :(
 */
 
-#include "Adafruit_GenericDevice.h"
+#include <Adafruit_GenericDevice.h>
 
 /*!
  * @brief Create a Generic device with the provided read/write functions
