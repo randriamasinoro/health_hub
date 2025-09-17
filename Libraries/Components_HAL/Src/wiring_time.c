@@ -36,6 +36,7 @@ uint32_t micros(void)
 
 void delay(uint32_t ms)
 {
+	osDelay(ms);
   if (ms != 0) {
     uint32_t start = getCurrentMillis();
     do {

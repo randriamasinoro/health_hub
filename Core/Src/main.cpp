@@ -22,10 +22,14 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
+
+#include "Protocentral_MAX30205.h"
+
+#include "MAX30105.h"
+#include "heartRate.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -128,7 +132,7 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 512);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -384,6 +388,8 @@ static void MX_GPIO_Init(void)
 void StartDefaultTask(void const * argument)
 {
   /* USER CODE BEGIN 5 */
+
+	//Initialize MPU6050
 	Adafruit_MPU6050 mpu;
 
 	  // Try to initialize!
@@ -401,6 +407,38 @@ void StartDefaultTask(void const * argument)
 	  mpu.setMotionInterrupt(true);
 
 	  osDelay(100);
+
+	  //Initialize MAX30205
+	  MAX30205 tempSensor;
+
+	  WIRE.begin();
+
+	  //scan for temperature in every 30s until a sensor is found. Scan for both addresses 0x48 and 0x49
+	  while(!tempSensor.scanAvailableSensors()){
+		  delay(30000);
+	  }
+
+	  tempSensor.begin();   // set continuous mode, active mode
+
+	  //Initialize MAX30105
+	  MAX30105 particleSensor;
+
+	  const byte RATE_SIZE = 4; //Increase this for more averaging. 4 is good.
+	  byte rates[RATE_SIZE]; //Array of heart rates
+	  byte rateSpot = 0;
+	  long lastBeat = 0; //Time at which the last beat occurred
+
+	  float beatsPerMinute;
+	  int beatAvg;
+
+	  particleSensor.begin(Wire, I2C_SPEED_FAST);
+
+	  Serial.println("Place your index finger on the sensor with steady pressure.");
+
+	  particleSensor.setup(); //Configure sensor with default settings
+	  particleSensor.setPulseAmplitudeRed(0x0A); //Turn Red LED to low to indicate sensor is running
+	  particleSensor.setPulseAmplitudeGreen(0); //Turn off Green LED
+
   /* Infinite loop */
   for(;;)
   {
@@ -411,6 +449,31 @@ void StartDefaultTask(void const * argument)
 	    }
 
 	  osDelay(10);
+
+	  float temp = tempSensor.getTemperature(); // read temperature for every 100ms
+
+	  long irValue = particleSensor.getIR();
+
+	    if (checkForBeat(irValue) == true)
+	    {
+	      //We sensed a beat!
+	      long delta = millis() - lastBeat;
+	      lastBeat = millis();
+
+	      beatsPerMinute = 60 / (delta / 1000.0);
+
+	      if (beatsPerMinute < 255 && beatsPerMinute > 20)
+	      {
+	        rates[rateSpot++] = (byte)beatsPerMinute; //Store this reading in the array
+	        rateSpot %= RATE_SIZE; //Wrap variable
+
+	        //Take average of readings
+	        beatAvg = 0;
+	        for (byte x = 0 ; x < RATE_SIZE ; x++)
+	          beatAvg += rates[x];
+	        beatAvg /= RATE_SIZE;
+	      }
+	    }
 
 	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	  osDelay(1000);
