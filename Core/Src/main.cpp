@@ -30,6 +30,10 @@
 
 #include "MAX30105.h"
 #include "heartRate.h"
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <U8g2lib.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -132,7 +136,7 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 512);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 2048);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -433,24 +437,28 @@ void StartDefaultTask(void const * argument)
 
 	  particleSensor.begin(Wire, I2C_SPEED_FAST);
 
-	  Serial.println("Place your index finger on the sensor with steady pressure.");
-
 	  particleSensor.setup(); //Configure sensor with default settings
 	  particleSensor.setPulseAmplitudeRed(0x0A); //Turn Red LED to low to indicate sensor is running
 	  particleSensor.setPulseAmplitudeGreen(0); //Turn off Green LED
 
+	  //Initialize Screen
+	  U8G2_SH1107_SEEED_128X128_1_SW_I2C u8g2(U8G2_R0, /* clock=*/ D6, /* data=*/ D3, /* reset=*/ U8X8_PIN_NONE);
+
+	  u8g2.begin();
+	  u8g2.enableUTF8Print();		// enable UTF8 support for the Arduino print() function
+
   /* Infinite loop */
   for(;;)
   {
+	  sensors_event_t a, g, temp;
 	  if(mpu.getMotionInterruptStatus()) {
 	      /* Get new sensor events with the readings */
-	      sensors_event_t a, g, temp;
 	      mpu.getEvent(&a, &g, &temp);
 	    }
 
 	  osDelay(10);
 
-	  float temp = tempSensor.getTemperature(); // read temperature for every 100ms
+	  float feverTemperature = tempSensor.getTemperature(); // read temperature for every 100ms
 
 	  long irValue = particleSensor.getIR();
 
@@ -475,8 +483,60 @@ void StartDefaultTask(void const * argument)
 	      }
 	    }
 
+	    u8g2.setFont(u8g2_font_b10_t_japanese1);  // all the glyphs of "こんにちは世界" are already included in japanese1: Lerning Level 1-6
+	      u8g2.setFontDirection(0);
+	      u8g2.firstPage();
+	      do {
+	    	  u8g2.setCursor(0, 15);
+	    	  	      u8g2.print("Acceleration:");
+
+	    	  	      u8g2.setCursor(70, 15);
+	    	  	      u8g2.print("X:");
+	    	  	      u8g2.print(a.acceleration.x);
+	    	  	      u8g2.setCursor(70, 25);
+	    	  	      u8g2.print("Y:");
+	    	  	      u8g2.print(a.acceleration.y);
+	    	  	      u8g2.setCursor(70, 35);
+	    	  	      u8g2.print("Z:");
+	    	  	      u8g2.print(a.acceleration.z);
+
+	    	  	      u8g2.setCursor(0, 50);
+	    	  	      u8g2.print("Gyroscope:");
+	    	  	      u8g2.setCursor(70, 50);
+	    	  	      u8g2.print("X:");
+	    	  	      u8g2.print(g.gyro.x);
+	    	  	      u8g2.setCursor(70, 60);
+	    	  	      u8g2.print("Y:");
+	    	  	      u8g2.print(g.gyro.y);
+	    	  	      u8g2.setCursor(70, 70);
+	    	  	      u8g2.print("Z:");
+	    	  	      u8g2.print(g.gyro.z);
+
+	    	  	      u8g2.setCursor(0, 85);
+	    	  	      u8g2.print("Room Temp:");
+	    	  	      u8g2.setCursor(70, 85);
+	    	  	      u8g2.print(temp.temperature);
+	    	  	      u8g2.print("°C");
+
+	    	  	      // Print MAX30105 Data
+	    	  	      u8g2.setCursor(0, 100);
+	    	  	      u8g2.print("Pulse:");
+	    	  	      u8g2.setCursor(70, 100);
+	    	  	      u8g2.print("IR:");
+	    	  	      u8g2.print(irValue);
+	    	  	      u8g2.setCursor(70, 110);
+	    	  	      u8g2.print("BPM:");
+	    	  	      u8g2.print(beatsPerMinute);
+
+	    	  	      //print MAX30205 Temperature (Fever)
+	    	  	      u8g2.setCursor(0, 125);
+	    	  	      u8g2.print("Fever °C:");
+	    	  	      u8g2.setCursor(70, 125);
+	    	  	      u8g2.print(feverTemperature);
+	      } while ( u8g2.nextPage() );
+
 	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  osDelay(1000);
+	  osDelay(500);
   }
   /* USER CODE END 5 */
 }
