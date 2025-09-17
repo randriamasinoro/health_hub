@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "adafruit_i2cdevice.h": "c",
+        "cstdint": "c",
+        "adafruit_busio_register.h": "c"
+    }
+}
