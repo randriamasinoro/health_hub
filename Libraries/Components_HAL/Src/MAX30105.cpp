@@ -139,7 +139,7 @@ MAX30105::MAX30105() {
   // Constructor
 }
 
-boolean MAX30105::begin(TwoWire &wirePort, uint32_t i2cSpeed, uint8_t i2caddr) {
+bool MAX30105::begin(TwoWire &wirePort, uint32_t i2cSpeed, uint8_t i2caddr) {
 
   _i2cPort = &wirePort; //Grab which port the user wants us to use
 
@@ -288,8 +288,6 @@ void MAX30105::setProximityThreshold(uint8_t threshMSB) {
 //Assigning a SLOT_RED_LED will pulse LED
 //Assigning a SLOT_RED_PILOT will ??
 void MAX30105::enableSlot(uint8_t slotNumber, uint8_t device) {
-
-  uint8_t originalContents;
 
   switch (slotNumber) {
     case (1):
