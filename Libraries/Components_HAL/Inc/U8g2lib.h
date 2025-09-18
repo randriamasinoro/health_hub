@@ -146,7 +146,8 @@ class U8G2
     bool begin(void) {
       /* note: call to u8x8_utf8_init is not required here, this is done in the setup procedures before */
       #ifndef U8G2_USE_DYNAMIC_ALLOC
-      initDisplay(); 
+      dwt_init();
+      initDisplay();
       clearDisplay(); 
       setPowerSave(0); 
       return 1;
