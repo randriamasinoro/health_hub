@@ -9,6 +9,17 @@
 #include "cmsis_os.h"
 #include "mainTask.hpp"
 
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
+#include <Wire.h>
+
+#include "Protocentral_MAX30205.h"
+
+#include "MAX30105.h"
+#include "heartRate.h"
+
+#include <U8g2lib.h>
+
 void mainTaskCpp(void const * argument)
 {
 	//Initialize MPU6050
