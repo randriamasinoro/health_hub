@@ -20,6 +20,12 @@
 
 #include <U8g2lib.h>
 
+// Get variables declared in main.c
+extern I2C_HandleTypeDef hi2c1;
+extern I2C_HandleTypeDef hi2c2;
+extern UART_HandleTypeDef huart1;
+extern osThreadId defaultTaskHandle;
+
 void mainTaskCpp(void const * argument)
 {
 	//Initialize MPU6050
@@ -85,9 +91,7 @@ void mainTaskCpp(void const * argument)
 	      mpu.getEvent(&a, &g, &temp);
 	    }
 
-	  osDelay(10);
-
-	  float feverTemperature = tempSensor.getTemperature(); // read temperature for every 100ms
+	  float feverTemperature = tempSensor.getTemperature();
 
 	  long irValue = particleSensor.getIR();
 
@@ -112,6 +116,10 @@ void mainTaskCpp(void const * argument)
 	      }
 	    }
 
+	    //Send to serial
+	    HAL_UART_Transmit(&huart1, (const uint8_t*)"TEST\r\n", 7, 1000);
+
+	    //print in screen
 	    u8g2.setFont(u8g2_font_b10_t_japanese1);  // all the glyphs of "こんにちは世界" are already included in japanese1: Lerning Level 1-6
 	      u8g2.setFontDirection(0);
 	      u8g2.firstPage();
