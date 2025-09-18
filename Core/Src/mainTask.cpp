@@ -48,7 +48,7 @@ void mainTaskCpp(void const * argument)
 
 	  //scan for temperature in every 30s until a sensor is found. Scan for both addresses 0x48 and 0x49
 	  while(!tempSensor.scanAvailableSensors()){
-		  delay(30000);
+		  osDelay(30000);
 	  }
 
 	  tempSensor.begin();   // set continuous mode, active mode
