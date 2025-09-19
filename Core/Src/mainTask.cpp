@@ -116,8 +116,21 @@ void mainTaskCpp(void const * argument)
 	      }
 	    }
 
+	    char uart_transmit_buffer[255];
+	    sprintf(uart_transmit_buffer, "AccelX:%d,%d;AccelY:%d,%d;AccelZ:%d,%d;GyroX:%d,%d;GyroY:%d,%d;GyroZ:%d,%d;RoomTempC:%d,%d;PulseIR:%lu;PulseBPM:%d,%d;FeverTempC:%d,%d\n",
+	    		(int)a.acceleration.x, (uint8_t)(((uint16_t)(a.acceleration.x*100)) %100),
+				(int)a.acceleration.y, (uint8_t)(((uint16_t)(a.acceleration.y*100)) %100),
+				(int)a.acceleration.z, (uint8_t)(((uint16_t)(a.acceleration.z*100)) %100),
+				(int)g.gyro.x, (uint8_t)(((uint16_t)(g.gyro.x*100)) %100),
+				(int)g.gyro.y, (uint8_t)(((uint16_t)(g.gyro.y*100)) %100),
+				(int)g.gyro.z, (uint8_t)(((uint16_t)(g.gyro.z*100)) %100),
+				(int)temp.temperature, (uint8_t)(((uint16_t)(temp.temperature*100)) %100),
+				irValue,
+				(int)beatsPerMinute, (uint8_t)(((uint16_t)(beatsPerMinute*100)) %100),
+				(int)feverTemperature, (uint8_t)(((uint16_t)(feverTemperature*100)) %100));
+
 	    //Send to serial
-	    HAL_UART_Transmit(&huart1, (const uint8_t*)"TEST\r\n", 7, 1000);
+	    HAL_UART_Transmit(&huart1, (const uint8_t*)uart_transmit_buffer, strlen(uart_transmit_buffer), 1000);
 
 	    //print in screen
 	    u8g2.setFont(u8g2_font_b10_t_japanese1);  // all the glyphs of "こんにちは世界" are already included in japanese1: Lerning Level 1-6
