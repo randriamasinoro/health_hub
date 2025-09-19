@@ -6,7 +6,6 @@
 */
 
 #include "main.h"
-#include "cmsis_os.h"
 #include "mainTask.hpp"
 
 #include <Adafruit_MPU6050.h>
@@ -23,178 +22,145 @@
 // Get variables declared in main.c
 extern I2C_HandleTypeDef hi2c1;
 extern I2C_HandleTypeDef hi2c2;
-extern UART_HandleTypeDef huart1;
-extern osThreadId defaultTaskHandle;
 
-void mainTaskCpp(void const * argument)
+extern UART_HandleTypeDef huart1;
+
+static void initializeMPU6050(Adafruit_MPU6050* mpu)
+{
+	// Try to initialize!
+		  if (!mpu->begin()) {
+		    while (1) {
+		    	delay(10);
+		    }
+		  }
+
+		  mpu->setHighPassFilter(MPU6050_HIGHPASS_0_63_HZ);
+		  mpu->setMotionDetectionThreshold(1);
+		  mpu->setMotionDetectionDuration(20);
+		  mpu->setInterruptPinLatch(true);	// Keep it latched.  Will turn off when reinitialized.
+		  mpu->setInterruptPinPolarity(true);
+		  mpu->setMotionInterrupt(true);
+
+		  delay(100);
+}
+
+static void initializeMAX30205(MAX30205* tempSensor)
+{
+	WIRE.begin();
+
+	//scan for temperature in every 30s until a sensor is found. Scan for both addresses 0x48 and 0x49
+	while(!tempSensor->scanAvailableSensors()){
+	  delay(30000);
+	}
+
+	tempSensor->begin();   // set continuous mode, active mode
+}
+
+static void initializeMAX30105(MAX30105* particleSensor)
+{
+	particleSensor->begin(Wire, I2C_SPEED_FAST);
+	particleSensor->setup(); //Configure sensor with default settings
+	particleSensor->setPulseAmplitudeRed(0x0A); //Turn Red LED to low to indicate sensor is running
+	particleSensor->setPulseAmplitudeGreen(0); //Turn off Green LED
+}
+
+static void initializeGrayScreen(U8G2_SH1107_SEEED_128X128_1_SW_I2C* u8g2)
+{
+	u8g2->begin();
+	u8g2->enableUTF8Print();
+}
+
+void mainTaskCpp()
 {
 	//Initialize MPU6050
 	Adafruit_MPU6050 mpu;
+	initializeMPU6050(&mpu);
 
-	  // Try to initialize!
-	  if (!mpu.begin()) {
-	    while (1) {
-	    	osDelay(10);
-	    }
-	  }
+	//Initialize MAX30205
+	MAX30205 tempSensor;
+	initializeMAX30205(&tempSensor);
 
-	  mpu.setHighPassFilter(MPU6050_HIGHPASS_0_63_HZ);
-	  mpu.setMotionDetectionThreshold(1);
-	  mpu.setMotionDetectionDuration(20);
-	  mpu.setInterruptPinLatch(true);	// Keep it latched.  Will turn off when reinitialized.
-	  mpu.setInterruptPinPolarity(true);
-	  mpu.setMotionInterrupt(true);
+	//Initialize MAX30105
+	MAX30105 particleSensor;
+	initializeMAX30105(&particleSensor);
 
-	  osDelay(100);
+	//Initialize Screen
+	U8G2_SH1107_SEEED_128X128_1_SW_I2C u8g2(U8G2_R0, /* clock=*/ D6, /* data=*/ D3, /* reset=*/ U8X8_PIN_NONE);
+	initializeGrayScreen(&u8g2);
 
-	  //Initialize MAX30205
-	  MAX30205 tempSensor;
-
-	  WIRE.begin();
-
-	  //scan for temperature in every 30s until a sensor is found. Scan for both addresses 0x48 and 0x49
-	  while(!tempSensor.scanAvailableSensors()){
-		  osDelay(30000);
-	  }
-
-	  tempSensor.begin();   // set continuous mode, active mode
-
-	  //Initialize MAX30105
-	  MAX30105 particleSensor;
-
-	  const byte RATE_SIZE = 4; //Increase this for more averaging. 4 is good.
-	  byte rates[RATE_SIZE]; //Array of heart rates
-	  byte rateSpot = 0;
-	  long lastBeat = 0; //Time at which the last beat occurred
-
-	  float beatsPerMinute;
-	  int beatAvg;
-
-	  particleSensor.begin(Wire, I2C_SPEED_FAST);
-
-	  particleSensor.setup(); //Configure sensor with default settings
-	  particleSensor.setPulseAmplitudeRed(0x0A); //Turn Red LED to low to indicate sensor is running
-	  particleSensor.setPulseAmplitudeGreen(0); //Turn off Green LED
-
-	  //Initialize Screen
-	  U8G2_SH1107_SEEED_128X128_1_SW_I2C u8g2(U8G2_R0, /* clock=*/ D6, /* data=*/ D3, /* reset=*/ U8X8_PIN_NONE);
-
-	  u8g2.begin();
-	  u8g2.enableUTF8Print();
+	//MAX30105 variables
+	const byte RATE_SIZE = 4; //Increase this for more averaging. 4 is good.
+	byte rates[RATE_SIZE]; //Array of heart rates
+	byte rateSpot = 0;
+	long lastBeat = 0; //Time at which the last beat occurred
+	float beatsPerMinute;
+	int beatAvg;
 
   /* Infinite loop */
   for(;;)
   {
-	  sensors_event_t a, g, temp;
-	  if(mpu.getMotionInterruptStatus()) {
-	      /* Get new sensor events with the readings */
-	      mpu.getEvent(&a, &g, &temp);
-	    }
+	//Get sensor (MPU6050) stuffs
+	sensors_event_t a, g, temp;
+	if(mpu.getMotionInterruptStatus()) {
+	    /* Get new sensor events with the readings */
+	    mpu.getEvent(&a, &g, &temp);
+	  }
+	float feverTemperature = tempSensor.getTemperature();
+	(void)feverTemperature;
 
-	  float feverTemperature = tempSensor.getTemperature();
+	long irValue = particleSensor.getIR();
 
-	  long irValue = particleSensor.getIR();
+	  if (checkForBeat(irValue) == true)
+	  {
+	    //We sensed a beat!
+	    long delta = millis() - lastBeat;
+	    lastBeat = millis();
 
-	    if (checkForBeat(irValue) == true)
+	    beatsPerMinute = 60 / (delta / 1000.0);
+
+	    if (beatsPerMinute < 255 && beatsPerMinute > 20)
 	    {
-	      //We sensed a beat!
-	      long delta = millis() - lastBeat;
-	      lastBeat = millis();
+	      rates[rateSpot++] = (byte)beatsPerMinute; //Store this reading in the array
+	      rateSpot %= RATE_SIZE; //Wrap variable
 
-	      beatsPerMinute = 60 / (delta / 1000.0);
-
-	      if (beatsPerMinute < 255 && beatsPerMinute > 20)
-	      {
-	        rates[rateSpot++] = (byte)beatsPerMinute; //Store this reading in the array
-	        rateSpot %= RATE_SIZE; //Wrap variable
-
-	        //Take average of readings
-	        beatAvg = 0;
-	        for (byte x = 0 ; x < RATE_SIZE ; x++)
-	          beatAvg += rates[x];
-	        beatAvg /= RATE_SIZE;
-	      }
+	      //Take average of readings
+	      beatAvg = 0;
+	      for (byte x = 0 ; x < RATE_SIZE ; x++)
+	        beatAvg += rates[x];
+	      beatAvg /= RATE_SIZE;
 	    }
+	  }
+	  
+	  //Send to serial stuff?
 
-	    char uart_transmit_buffer[255];
-	    sprintf(uart_transmit_buffer, "AccelX:%d,%d;AccelY:%d,%d;AccelZ:%d,%d;GyroX:%d,%d;GyroY:%d,%d;GyroZ:%d,%d;RoomTempC:%d,%d;PulseIR:%lu;PulseBPM:%d,%d;FeverTempC:%d,%d\n",
-	    		(int)a.acceleration.x, (uint8_t)(((uint16_t)(a.acceleration.x*100)) %100),
-				(int)a.acceleration.y, (uint8_t)(((uint16_t)(a.acceleration.y*100)) %100),
-				(int)a.acceleration.z, (uint8_t)(((uint16_t)(a.acceleration.z*100)) %100),
-				(int)g.gyro.x, (uint8_t)(((uint16_t)(g.gyro.x*100)) %100),
-				(int)g.gyro.y, (uint8_t)(((uint16_t)(g.gyro.y*100)) %100),
-				(int)g.gyro.z, (uint8_t)(((uint16_t)(g.gyro.z*100)) %100),
-				(int)temp.temperature, (uint8_t)(((uint16_t)(temp.temperature*100)) %100),
-				irValue,
-				(int)beatsPerMinute, (uint8_t)(((uint16_t)(beatsPerMinute*100)) %100),
-				(int)feverTemperature, (uint8_t)(((uint16_t)(feverTemperature*100)) %100));
+	  //print screen stuffs
+	  u8g2.setFont(u8g2_font_b10_t_japanese1);  // all the glyphs of "こんにちは世界" are already included in japanese1: Lerning Level 1-6
+	  u8g2.setFontDirection(0);
+	  u8g2.firstPage();
+	  do {
+		u8g2.setCursor(0, 15);
+	  	u8g2.print("こんにちは世界");
+	  	u8g2.setCursor(0, 30);
+	  	u8g2.print("Hello Word");
+	  	u8g2.setCursor(0, 45);
+	  	u8g2.print("Bonjour le monde");
+		u8g2.setCursor(0, 60);
+	  	u8g2.print(g.gyro.x);
+	  	u8g2.setCursor(0, 75);
+	  	u8g2.print("etc...");
+	} while ( u8g2.nextPage() );
 
-	    //Send to serial
-	    HAL_UART_Transmit(&huart1, (const uint8_t*)uart_transmit_buffer, strlen(uart_transmit_buffer), 1000);
-
-	    //print in screen
-	    u8g2.setFont(u8g2_font_b10_t_japanese1);  // all the glyphs of "こんにちは世界" are already included in japanese1: Lerning Level 1-6
-	      u8g2.setFontDirection(0);
-	      u8g2.firstPage();
-	      do {
-	    	  u8g2.setCursor(0, 15);
-	    	  	      u8g2.print("Acceleration:");
-
-	    	  	      u8g2.setCursor(70, 15);
-	    	  	      u8g2.print("X:");
-	    	  	      u8g2.print(a.acceleration.x);
-	    	  	      u8g2.setCursor(70, 25);
-	    	  	      u8g2.print("Y:");
-	    	  	      u8g2.print(a.acceleration.y);
-	    	  	      u8g2.setCursor(70, 35);
-	    	  	      u8g2.print("Z:");
-	    	  	      u8g2.print(a.acceleration.z);
-
-	    	  	      u8g2.setCursor(0, 50);
-	    	  	      u8g2.print("Gyroscope:");
-	    	  	      u8g2.setCursor(70, 50);
-	    	  	      u8g2.print("X:");
-	    	  	      u8g2.print(g.gyro.x);
-	    	  	      u8g2.setCursor(70, 60);
-	    	  	      u8g2.print("Y:");
-	    	  	      u8g2.print(g.gyro.y);
-	    	  	      u8g2.setCursor(70, 70);
-	    	  	      u8g2.print("Z:");
-	    	  	      u8g2.print(g.gyro.z);
-
-	    	  	      u8g2.setCursor(0, 85);
-	    	  	      u8g2.print("Room Temp:");
-	    	  	      u8g2.setCursor(70, 85);
-	    	  	      u8g2.print(temp.temperature);
-	    	  	      u8g2.print("°C");
-
-	    	  	      // Print MAX30105 Data
-	    	  	      u8g2.setCursor(0, 100);
-	    	  	      u8g2.print("Pulse:");
-	    	  	      u8g2.setCursor(70, 100);
-	    	  	      u8g2.print("IR:");
-	    	  	      u8g2.print(irValue);
-	    	  	      u8g2.setCursor(70, 110);
-	    	  	      u8g2.print("BPM:");
-	    	  	      u8g2.print(beatsPerMinute);
-
-	    	  	      //print MAX30205 Temperature (Fever)
-	    	  	      u8g2.setCursor(0, 125);
-	    	  	      u8g2.print("Fever °C:");
-	    	  	      u8g2.setCursor(70, 125);
-	    	  	      u8g2.print(feverTemperature);
-	      } while ( u8g2.nextPage() );
-
-	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  osDelay(500);
+	// Toggle User led (LD2)
+	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	delay(500);
   }
 }
 
 // All C calls from main.c below
 extern "C"
 {
-	void mainTaskC(void const * argument)
+	void mainTaskC()
 	{
-		mainTaskCpp(argument);
+		mainTaskCpp();
 	}
 }

@@ -19,7 +19,7 @@
 #include <stdlib.h>
 
 
-void mainTaskCpp(void const * argument);	// Cpp function to call into main event loop
+void mainTaskCpp();	// Cpp function to call into main event loop
 
 
 #ifdef __cplusplus
@@ -27,7 +27,7 @@ extern "C"
 {
 #endif
 
-	void mainTaskC(void const * argument);
+	void mainTaskC();
 
 #ifdef __cplusplus
 }
