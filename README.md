@@ -44,3 +44,11 @@ Here the included library list (no need further installation):
 |U8g2_Arduino: Arduino Monochrome Graphics Library| https://github.com/olikraus/U8g2_Arduino|
 
 You shall use them as in **examples** folder in each repository.
+
+## Undefined Symbol error
+
+In case of undefined symbol error, you are using some function that was not included but allowed in the library.
+
+**That's mean that you can do it without the function/variable/define etc... you tried to use**
+
+But, to fix the error you shall find first in which librairy the symbol belong. Then, find the definition (.cpp/.h) in the library and add files in `Libraries/Components_HAL` folder (`Inc` or `Src`). 
