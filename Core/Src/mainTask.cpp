@@ -72,15 +72,15 @@ static void initializeGrayScreen(U8G2_SH1107_SEEED_128X128_1_SW_I2C* u8g2)
 
 void mainTaskCpp()
 {
-	//Initialize MPU6050
+	//Initialize MPU6050 (I2C1)
 	Adafruit_MPU6050 mpu;
 	initializeMPU6050(&mpu);
 
-	//Initialize MAX30205
+	//Initialize MAX30205 (I2C1)
 	MAX30205 tempSensor;
 	initializeMAX30205(&tempSensor);
 
-	//Initialize MAX30105
+	//Initialize MAX30105 (I2C1)
 	MAX30105 particleSensor;
 	initializeMAX30105(&particleSensor);
 
@@ -99,15 +99,17 @@ void mainTaskCpp()
   /* Infinite loop */
   for(;;)
   {
-	//Get sensor (MPU6050) stuffs
+	//Get sensor (MPU6050) values
 	sensors_event_t a, g, temp;
 	if(mpu.getMotionInterruptStatus()) {
 	    /* Get new sensor events with the readings */
 	    mpu.getEvent(&a, &g, &temp);
 	  }
-	float feverTemperature = tempSensor.getTemperature();
-	(void)feverTemperature;
 
+	//Get sensor (MAX30205) temperature
+	float feverTemperature = tempSensor.getTemperature();
+
+	//Get sensor (MAX30105) IR value & compute heart beat
 	long irValue = particleSensor.getIR();
 
 	  if (checkForBeat(irValue) == true)
@@ -131,9 +133,9 @@ void mainTaskCpp()
 	    }
 	  }
 	  
-	  //Send to serial stuff?
+	  //Send here something through to Serial?
 
-	  //print screen stuffs
+	  //print data some data on screen
 	  u8g2.setFont(u8g2_font_b10_t_japanese1);  // all the glyphs of "こんにちは世界" are already included in japanese1: Lerning Level 1-6
 	  u8g2.setFontDirection(0);
 	  u8g2.firstPage();
@@ -145,7 +147,7 @@ void mainTaskCpp()
 	  	u8g2.setCursor(0, 45);
 	  	u8g2.print("Bonjour le monde");
 		u8g2.setCursor(0, 60);
-	  	u8g2.print(g.gyro.x);
+	  	u8g2.print(feverTemperature);
 	  	u8g2.setCursor(0, 75);
 	  	u8g2.print("etc...");
 	} while ( u8g2.nextPage() );
