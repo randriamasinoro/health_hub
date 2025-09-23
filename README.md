@@ -26,12 +26,12 @@ Additionally, for connections we shall have:
 
 ## Librairies usage
 
-This code was developped with STM32Cube IDE with Some Arduino wrapper.
+This code was developed with STM32Cube IDE with Some Arduino wrapper.
 
 Thanks to that wrapper it is possible to use some Arduino like code.
 The examples provided (.ino files), can be used the same way in your main application.
 
-(!) The wrapper was not used entierely & have some modification in code (due to partial use). Some arduino function (like `Serial.print`) may not work, use HAL STM32Cube functions instead.
+(!) The wrapper was not used entirely & have some modification in code (due to partial use). Some arduino function (like `Serial.print`) may not work, use HAL STM32Cube functions instead.
 
 Here the included library list (no need further installation):
 
@@ -51,4 +51,4 @@ In case of undefined symbol error, you are using some function that was not incl
 
 **That's mean that you can do it without the function/variable/define etc... you tried to use**
 
-But, to fix the error you shall find first in which librairy the symbol belong. Then, find the definition (.cpp/.h) in the library and add files in `Libraries/Components_HAL` folder (`Inc` or `Src`). 
+But, to fix the error you shall find first in which library the symbol belong. Then, find the definition (.cpp/.h) in the library and add files in `Libraries/Components_HAL` folder (`Inc` or `Src`). 
