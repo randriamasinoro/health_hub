@@ -64,7 +64,7 @@ static void initializeMAX30105(MAX30105* particleSensor)
 	particleSensor->setPulseAmplitudeGreen(0); //Turn off Green LED
 }
 
-static void initializeGrayScreen(U8G2_SH1107_SEEED_128X128_1_SW_I2C* u8g2)
+static void initializeGrayScreen(U8G2* u8g2)
 {
 	u8g2->begin();
 	u8g2->enableUTF8Print();
@@ -85,7 +85,8 @@ void mainTaskCpp()
 	initializeMAX30105(&particleSensor);
 
 	//Initialize Screen
-	U8G2_SH1107_SEEED_128X128_1_SW_I2C u8g2(U8G2_R0, /* clock=*/ D6, /* data=*/ D3, /* reset=*/ U8X8_PIN_NONE);
+	//U8G2_SH1107_SEEED_128X128_1_SW_I2C u8g2(U8G2_R0, /* clock=*/ D6, /* data=*/ D3, /* reset=*/ U8X8_PIN_NONE);
+	U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ D6, /* data=*/ D3, /* reset=*/ U8X8_PIN_NONE);
 	initializeGrayScreen(&u8g2);
 
 	//MAX30105 variables
