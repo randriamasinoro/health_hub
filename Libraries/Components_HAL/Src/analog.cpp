@@ -334,7 +334,7 @@ uint32_t get_dac_channel(PinName pin)
   * @param hdac: DAC handle pointer
   * @retval None
   */
-void HAL_DAC_MspInit(DAC_HandleTypeDef *hdac)
+__weak void HAL_DAC_MspInit(DAC_HandleTypeDef *hdac)
 {
   /* DAC Periph clock enable */
   if (hdac->Instance == DAC1) {
@@ -462,7 +462,7 @@ void dac_write_value(PinName pin, uint32_t value, uint8_t do_init)
   *         the configuration information for the specified DAC.
   * @retval None
   */
-void HAL_DAC_MspDeInit(DAC_HandleTypeDef *hdac)
+__weak void HAL_DAC_MspDeInit(DAC_HandleTypeDef *hdac)
 {
   /* DAC Periph clock disable */
   if (hdac->Instance == DAC1) {
@@ -589,7 +589,7 @@ void dac_stop(PinName pin)
   * @param hadc: ADC handle pointer
   * @retval None
   */
-void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
+__weak void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
 {
   /*##-1- Enable peripherals and GPIO Clocks #################################*/
   /* ADC Periph clock enable */
@@ -670,7 +670,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
   * @param  hadc: ADC handle
   * @retval None
   */
-void HAL_ADC_MspDeInit(ADC_HandleTypeDef *hadc)
+__weak void HAL_ADC_MspDeInit(ADC_HandleTypeDef *hadc)
 {
 #ifdef __HAL_RCC_ADC_FORCE_RESET
   __HAL_RCC_ADC_FORCE_RESET();

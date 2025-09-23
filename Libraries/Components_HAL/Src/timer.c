@@ -35,7 +35,7 @@ timerObj_t *get_timer_obj(TIM_HandleTypeDef *htim)
   * @param  htim_base: TIM handle
   * @retval None
   */
-void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim_base)
+__weak void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim_base)
 {
   timerObj_t *obj = get_timer_obj(htim_base);
   enableTimerClock(htim_base);
@@ -56,7 +56,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim_base)
   * @param  htim_base: TIM handle
   * @retval None
   */
-void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef *htim_base)
+__weak void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef *htim_base)
 {
   disableTimerClock(htim_base);
   HAL_NVIC_DisableIRQ(getTimerUpIrq(htim_base->Instance));
@@ -68,7 +68,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef *htim_base)
   * @param  htim: TIM handle
   * @retval None
   */
-void HAL_TIM_OC_MspInit(TIM_HandleTypeDef *htim)
+__weak void HAL_TIM_OC_MspInit(TIM_HandleTypeDef *htim)
 {
   timerObj_t *obj = get_timer_obj(htim);
   enableTimerClock(htim);
@@ -89,7 +89,7 @@ void HAL_TIM_OC_MspInit(TIM_HandleTypeDef *htim)
   * @param  htim: TIM handle
   * @retval None
   */
-void HAL_TIM_OC_MspDeInit(TIM_HandleTypeDef *htim)
+__weak void HAL_TIM_OC_MspDeInit(TIM_HandleTypeDef *htim)
 {
   disableTimerClock(htim);
   HAL_NVIC_DisableIRQ(getTimerUpIrq(htim->Instance));
@@ -101,7 +101,7 @@ void HAL_TIM_OC_MspDeInit(TIM_HandleTypeDef *htim)
   * @param  htim: TIM handle
   * @retval None
   */
-void HAL_TIM_IC_MspInit(TIM_HandleTypeDef *htim)
+__weak void HAL_TIM_IC_MspInit(TIM_HandleTypeDef *htim)
 {
   enableTimerClock(htim);
 }
@@ -111,7 +111,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef *htim)
   * @param  htim: TIM handle
   * @retval None
   */
-void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef *htim)
+__weak void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef *htim)
 {
   disableTimerClock(htim);
 }

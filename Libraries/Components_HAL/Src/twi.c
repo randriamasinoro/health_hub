@@ -1192,7 +1192,7 @@ void i2c_attachSlaveTxEvent(i2c_t *obj, void (*function)(i2c_t *))
   * @param  AddrMatchCode: Address Match Code
   * @retval None
   */
-void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, uint16_t AddrMatchCode)
+__weak void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, uint16_t AddrMatchCode)
 {
   UNUSED(AddrMatchCode);
   i2c_t *obj = get_i2c_obj(hi2c);
@@ -1227,7 +1227,7 @@ void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, ui
   *                the configuration information for the specified I2C.
   * @retval None
   */
-void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c)
+__weak void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c)
 {
   i2c_t *obj = get_i2c_obj(hi2c);
 
@@ -1247,7 +1247,7 @@ void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c)
   *                the configuration information for the specified I2C.
   * @retval None
   */
-void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
+__weak void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
   i2c_t *obj = get_i2c_obj(hi2c);
   /* One more byte was received, store it then prepare next */
@@ -1269,7 +1269,7 @@ void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
   *                the configuration information for the specified I2C.
   * @retval None
   */
-void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
+__weak void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
   i2c_t *obj = get_i2c_obj(hi2c);
   /* Reset transmit buffer size */
@@ -1286,7 +1286,7 @@ void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
   *                the configuration information for the specified I2C.
   * @retval None
   */
-void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
+__weak void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
 {
   i2c_t *obj = get_i2c_obj(hi2c);
 

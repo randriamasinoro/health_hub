@@ -1480,12 +1480,12 @@ void HardwareTimer::timerHandleDeinit()
 /******************************************************************************/
 extern "C" {
 
-  void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+  __weak void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
   {
     HardwareTimer::captureCompareCallback(htim);
   }
 
-  void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
+  __weak void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
   {
     HardwareTimer::captureCompareCallback(htim);
   }

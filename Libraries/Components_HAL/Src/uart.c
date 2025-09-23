@@ -1017,7 +1017,7 @@ uint8_t uart_index(UART_HandleTypeDef *huart)
   * @param  UartHandle pointer on the uart reference
   * @retval None
   */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+__weak void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
   serial_t *obj = get_serial_obj(huart);
   if (obj) {
@@ -1030,7 +1030,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   * @param  UartHandle pointer on the uart reference
   * @retval None
   */
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+__weak void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
   serial_t *obj = get_serial_obj(huart);
   if (obj) {
@@ -1043,7 +1043,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   * @param  UartHandle pointer on the uart reference
   * @retval None
   */
-void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+__weak void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
 #if defined(STM32F1xx) || defined(STM32F2xx) || defined(STM32F4xx) || defined(STM32L1xx)
   if (__HAL_UART_GET_FLAG(huart, UART_FLAG_PE) != RESET) {
@@ -1351,7 +1351,7 @@ void UART12_IRQHandler(void)
   * @param  UART handler
   * @retval None
   */
-void HAL_UARTEx_WakeupCallback(UART_HandleTypeDef *huart)
+__weak void HAL_UARTEx_WakeupCallback(UART_HandleTypeDef *huart)
 {
   serial_t *obj = get_serial_obj(huart);
   HAL_UART_Receive_IT(huart,  &(obj->recv), 1);
