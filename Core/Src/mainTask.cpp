@@ -13,6 +13,9 @@
 #include <Wire.h>
 
 #include "Protocentral_MAX30205.h"
+//Here the Si7021 if you have not the fever click
+//Uncomment following lines if you're using Si7021
+//#include "Adafruit_Si7021.h"
 
 #include "MAX30105.h"
 #include "heartRate.h"
@@ -70,6 +73,18 @@ static void initializeGrayScreen(U8G2* u8g2)
 	u8g2->enableUTF8Print();
 }
 
+//Uncomment following lines if you're using Si7021
+//static void initializeSi7021(Adafruit_Si7021* sensor)
+//{
+//	if (!sensor->begin())
+//	{
+//		while (1)
+//		{
+//			delay(10);
+//		}
+//	}
+//}
+
 void mainTaskCpp()
 {
 	//Initialize MPU6050 (I2C1)
@@ -79,6 +94,9 @@ void mainTaskCpp()
 	//Initialize MAX30205 (I2C1)
 	MAX30205 tempSensor;
 	initializeMAX30205(&tempSensor);
+	//Uncomment following lines if you're using Si7021
+	//Adafruit_Si7021 si7021Sensor;
+	//initializeSi7021(&si7021Sensor);
 
 	//Initialize MAX30105 (I2C1)
 	MAX30105 particleSensor;
@@ -88,6 +106,8 @@ void mainTaskCpp()
 	//U8G2_SH1107_SEEED_128X128_1_SW_I2C u8g2(U8G2_R0, /* clock=*/ D6, /* data=*/ D3, /* reset=*/ U8X8_PIN_NONE);
 	U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ D6, /* data=*/ D3, /* reset=*/ U8X8_PIN_NONE);
 	initializeGrayScreen(&u8g2);
+
+
 
 	//MAX30105 variables
 	const byte RATE_SIZE = 4; //Increase this for more averaging. 4 is good.
@@ -109,6 +129,8 @@ void mainTaskCpp()
 
 	//Get sensor (MAX30205) temperature
 	float feverTemperature = tempSensor.getTemperature();
+	//Uncomment following lines if you're using Si7021
+	//float feverTemperature = si7021Sensor.readTemperature();
 
 	//Get sensor (MAX30105) IR value & compute heart beat
 	long irValue = particleSensor.getIR();
