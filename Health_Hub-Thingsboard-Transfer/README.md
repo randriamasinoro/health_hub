@@ -54,6 +54,7 @@ And will send to Thingsboard telemetry data with following key & value regarding
 | GyroZ | Gyro Z | 0.3 | float |
 | RoomTempC | Room Temperature | 22.3 | float |
 | PulseIR | Pulse IR | 717 | uint |
+| PulseBPM | Pulse BPM | 0.22 | float |
 | FeverTempC | Fever Temperature | 21.75 | float |
 
 ## Send Unknown Data
