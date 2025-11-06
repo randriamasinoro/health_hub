@@ -1,7 +1,7 @@
 # Health Hub Python Thingsboard interface
 
 Here you shall have a USB/TTL (Serial) cable and connect it to your computer.
-Then check with device is used (COM in Window, /dev in Linux), create your own device on Thingsboard, get the token and use the script as below:
+Then check with device is used (COM in Window, /dev in Linux), create your own device on [Thingsboard](http://campusco.univ-ubs.fr:63080), get the token and use the script as below:
 
 ```sh
 python3 captureFrameAndSendToThingsboard.py --help
@@ -20,6 +20,8 @@ options:
   --baud BAUD, -b BAUD  Baud rate (default: 115200)
   --timeout TIMEOUT     Overall read timeout in seconds (default: 2.0)
 ```
+
+To log in to Thingsboard, check the available resources in corresponding Moodle webpages.  
 
 In case of uninstalled module, activate the environment, launch the command, then, **once finished** deactivate the environment:
 ```
@@ -62,3 +64,7 @@ And will send to Thingsboard telemetry data with following key & value regarding
 If you want to send some unknown data, like Step number, etc...
 
 Use following structure `"<Key1>:<Data1>;<Key2>:<Data2>;<Key3>:<Data3>\n"`
+
+## Create our own dashboard
+
+To create your one dashboard you can have an idea with [live demo](https://thingsboard.io/use-cases/health-care/) and follow [official documentation](https://thingsboard.io/docs/).
