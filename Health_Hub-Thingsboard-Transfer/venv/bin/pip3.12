@@ -1,0 +1,10 @@
+#!/bin/sh
+'''exec' /home/maquette/Documents/COURS/SEM2105T-Systeme-embarque-avec-microcontroleur_et_real_time_os/health-hub-stm32cube/Health_Hub-Thingsboard-Transfer/venv/bin/python3 "$0" "$@"
+' '''
+# -*- coding: utf-8 -*-
+import re
+import sys
+from pip._internal.cli.main import main
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())

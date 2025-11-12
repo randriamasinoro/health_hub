@@ -25,7 +25,7 @@ To log in to Thingsboard, check the available resources in corresponding Moodle 
 
 In case of uninstalled module, activate the environment, launch the command, then, **once finished** deactivate the environment:
 ```
-source ./bin/activate
+source ./venv/bin/activate
 python3 captureFrameAndSendToThingsboard.py -t "MY_PERSONAL_TOKEN"
 deactivate
 ```
@@ -33,9 +33,18 @@ deactivate
 Or, in Windows:
 ```
 # In PowerShell
-bin\Activate.ps1
+venv\bin\Activate.ps1
 python3 captureFrameAndSendToThingsboard.py -t "MY_PERSONAL_TOKEN"
 deactivate
+```
+
+If the environment doesn't work properly, you can delete it and recreate it manually:
+```
+# In Linux
+rm -rf venv
+python3 -m venv venv
+. venv/bin/activate
+pip install pyserial tb-mqtt-client setuptools==80.9.0
 ```
 
 ## Known Data format
