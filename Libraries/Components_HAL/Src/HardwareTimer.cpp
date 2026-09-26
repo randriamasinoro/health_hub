@@ -1650,19 +1650,19 @@ extern "C" {
 #endif
 #endif //TIM10_BASE
 
-#if defined(TIM11_BASE)
+//#if defined(TIM11_BASE)
   /**
     * @brief  TIM11 IRQHandler
     * @param  None
     * @retval None
     */
-  void TIM11_IRQHandler(void)
-  {
-    if (HardwareTimer_Handle[TIMER11_INDEX]) {
-      HAL_TIM_IRQHandler(&HardwareTimer_Handle[TIMER11_INDEX]->handle);
-    }
-  }
-#endif //TIM11_BASE
+  //void TIM11_IRQHandler(void)
+  //{
+   // if (HardwareTimer_Handle[TIMER11_INDEX]) {
+     // HAL_TIM_IRQHandler(&HardwareTimer_Handle[TIMER11_INDEX]->handle);
+    //}
+  //}
+//#endif //TIM11_BASE
 
 #if defined(TIM12_BASE)
   /**
